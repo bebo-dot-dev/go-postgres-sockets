@@ -20,8 +20,8 @@ import (
 func main() {
 	log.Printf("Server started")
 
-	service :=  api.NewNotificationsAPIApiService()
-	controller := api.NewNotificationsAPIApiController(service)
+	service :=  api.NewNotificationsApiService()
+	controller := api.NewNotificationsApiController(service)
 
 	router := api.NewRouter(controller)
 
