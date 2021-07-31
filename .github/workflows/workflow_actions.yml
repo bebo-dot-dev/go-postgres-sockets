@@ -36,7 +36,7 @@ jobs:
         run: ./openapi-generator-cli generate -i ./oas_spec_definition/go-postgres-sockets.yaml -g go-server -o ./server -ppackageName=api -psourceFolder=api --git-user-id=bebo-dot-dev --git-repo-id=go-postgres-sockets/server --enable-post-process-file      
       - name: Format generated Go code
         shell: bash
-        run: goimports -w -v ./ && cd ./server && go get ./... && go fmt ./... && cd ../client && go get ./... && go fmt ./...
+        run: goimports -w -v ./ && cd ./server && go get ./... && go fmt ./...
       - name: Commit generated Go code
         shell: bash
         run: git config --global user.email "joe@bebo.dev" && git config --global user.name "Joe" && git fetch --all && git add -A && git commit -m "automated codegen commit" && git pull --rebase && git push
