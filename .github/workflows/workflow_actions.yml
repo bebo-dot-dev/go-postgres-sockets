@@ -1,0 +1,42 @@
+name: go-codegen
+
+on:
+  push:
+    paths:
+    - 'oas_spec_definition/*.yaml'  
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'reason'
+        required: false
+        default: 'manual run'
+
+jobs:
+  run-go-codegen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16.6
+      - name: Prepare for code formatting
+        shell: bash
+        run: go get golang.org/x/tools/cmd/goimports && which gofmt
+        env:
+          GO_POST_PROCESS_FILE: "gofmt -w"
+      - name: Setup the latest openapi-generator-cli
+        shell: bash
+        run: curl https://raw.githubusercontent.com/OpenAPITools/openapi-generator/master/bin/utils/openapi-generator-cli.sh > ./openapi-generator-cli && chmod u+x ./openapi-generator-cli
+      - name: Execute go-server codegen
+        run: ./openapi-generator-cli generate -i ./oas_spec_definition/go-postgres-sockets.yaml -g go-server -o ./server -ppackageName=api -psourceFolder=api --git-user-id=bebo-dot-dev --git-repo-id=go-postgres-sockets/server --enable-post-process-file      
+      - name: Format generated Go code
+        shell: bash
+        run: goimports -w -v ./ && cd ./server && go get ./... && go fmt ./... && cd ../client && go get ./... && go fmt ./...
+      - name: Commit generated Go code
+        shell: bash
+        run: git config --global user.email "joe@bebo.dev" && git config --global user.name "Joe" && git fetch --all && git add -A && git commit -m "automated codegen commit" && git pull --rebase && git push
