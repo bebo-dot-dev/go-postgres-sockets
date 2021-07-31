@@ -12,45 +12,69 @@ package api
 
 import (
 	"context"
-	"errors"
+	"database/sql"
+	"fmt"
+	_ "github.com/lib/pq"
 	"net/http"
+	"os"
 )
 
-// NotificationsAPIApiService is a service that implents the logic for the NotificationsAPIApiServicer
+const (
+	dbhost = "localhost"
+	dbport = 5432
+	dbuser = "postgres"
+	dbname = "notifications"
+)
+
+// NotificationsApiService is a service that implements the logic for the NotificationsApiServicer
 // This service should implement the business logic for every endpoint for the NotificationsAPIApi API.
 // Include any external packages or services that will be required by this service.
-type NotificationsAPIApiService struct {
+type NotificationsApiService struct {
 }
 
-// NewNotificationsAPIApiService creates a default api service
-func NewNotificationsAPIApiService() NotificationsAPIApiServicer {
-	return &NotificationsAPIApiService{}
+// NewNotificationsApiService creates a default api service
+func NewNotificationsApiService() NotificationsApiServicer {
+	return &NotificationsApiService{}
+}
+
+func (s *NotificationsApiService) getDbConnection() *sql.DB {
+	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		dbhost, dbport, dbuser, os.Getenv("POSTGRES_PASSWORD"), dbname)
+
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+
+	return db
 }
 
 // AddNotification - adds a new notification
-func (s *NotificationsAPIApiService) AddNotification(ctx context.Context, notificationDetails NotificationDetails) (ImplResponse, error) {
-	// TODO - update AddNotification with the required logic for this service method.
-	// Add api_notifications_api_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+func (s *NotificationsApiService) AddNotification(ctx context.Context, request NotificationDetails) (ImplResponse, error) {
+	err := request.Validate()
+	if err != nil {
+		return Response(http.StatusBadRequest, nil), err
+	}
 
-	//TODO: Uncomment the next line to return response Response(201, Id{}) or use other options such as http.Ok ...
-	//return Response(201, Id{}), nil
+	db := s.getDbConnection()
+	defer db.Close()
 
-	//TODO: Uncomment the next line to return response Response(400, {}) or use other options such as http.Ok ...
-	//return Response(400, nil),nil
+	var notificationId sql.NullInt32
+	err = db.QueryRow("SELECT id FROM public.new_notification($1, $2);", request.NotificationType, request.NotificationText).Scan(&notificationId)
 
-	//TODO: Uncomment the next line to return response Response(500, {}) or use other options such as http.Ok ...
-	//return Response(500, nil),nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("AddNotification method not implemented")
+	return Response(http.StatusCreated, Id{Id: notificationId.Int32}), nil
 }
 
 // Ping - tests this api
-func (s *NotificationsAPIApiService) Ping(ctx context.Context) (ImplResponse, error) {
-	// TODO - update Ping with the required logic for this service method.
-	// Add api_notifications_api_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(201, PingResponse{}) or use other options such as http.Ok ...
-	//return Response(201, PingResponse{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("Ping method not implemented")
+func (s *NotificationsApiService) Ping(ctx context.Context) (ImplResponse, error) {
+	hostname, err := os.Hostname()
+	if err != nil {
+		return Response(http.StatusInternalServerError, nil), err
+	}
+	return Response(http.StatusCreated, PingResponse{Hostname: hostname}), nil
 }
