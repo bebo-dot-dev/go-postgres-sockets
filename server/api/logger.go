@@ -1,5 +1,5 @@
 /*
- * User API
+ * Notifications API
  *
  * A notifications proof of concept API
  *
