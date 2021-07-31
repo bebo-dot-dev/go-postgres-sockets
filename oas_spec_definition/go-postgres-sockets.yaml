@@ -1,7 +1,7 @@
 --- 
 openapi: 3.0.0
 info:
-  title: User API
+  title: Notifications API
   description: A notifications proof of concept API
   contact:
     email: joe@bebo.dev
