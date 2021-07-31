@@ -65,7 +65,11 @@ func (s *NotificationsApiService) AddNotification(ctx context.Context, request N
 	defer db.Close()
 
 	var notificationId sql.NullInt32
-	err = db.QueryRow("SELECT id FROM public.new_notification($1, $2);", request.NotificationType, request.NotificationText).Scan(&notificationId)
+	err = db.QueryRow("SELECT public.new_notification($1, $2);", request.NotificationType, request.NotificationText).Scan(&notificationId)
+
+	if err != nil {
+		return Response(http.StatusInternalServerError, nil), err
+	}
 
 	return Response(http.StatusCreated, Id{Id: notificationId.Int32}), nil
 }
