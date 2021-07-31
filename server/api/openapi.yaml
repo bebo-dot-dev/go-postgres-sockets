@@ -1,0 +1,142 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: joe@bebo.dev
+  description: A notifications proof of concept API
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: User API
+  version: 0.1.0
+servers:
+- description: localhost test endpoint
+  url: http://localhost:8080
+tags:
+- description: Notifications operations
+  name: Notifications API
+paths:
+  /ping:
+    get:
+      description: returns the hostname of the server running this service
+      operationId: ping
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PingResponse'
+          description: server responded
+      summary: tests this api
+      tags:
+      - Notifications API
+  /addNotification:
+    put:
+      description: Adds a new notification to the system
+      operationId: addNotification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationDetails'
+        description: the notification to add
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Id'
+          description: StatusCreated, notification created
+        "400":
+          description: StatusBadRequest
+        "500":
+          description: ServerError
+      summary: adds a new notification
+      tags:
+      - Notifications API
+components:
+  schemas:
+    PingResponse:
+      example:
+        hostname: localhost
+      properties:
+        hostname:
+          example: localhost
+          type: string
+      required:
+      - hostname
+      type: object
+    NotificationDetails:
+      example:
+        notificationText: some notification data
+        notificationType: 1
+      properties:
+        notificationType:
+          description: describes the type of notification (0 = none, 1 = email, 2
+            = sms, 3 = slack)
+          example: 1
+          type: integer
+        notificationText:
+          description: arbitrary notification data
+          example: some notification data
+          type: string
+      required:
+      - notificationText
+      - notificationType
+      type: object
+    Id:
+      example:
+        id: 123
+      properties:
+        id:
+          description: the id of a new entity
+          example: 123
+          type: integer
+      required:
+      - id
+    NotificationSocketMessage:
+      properties:
+        table:
+          description: describes the database table changed
+          example: notifications
+          type: string
+        operation:
+          description: describes the database operation performed
+          example: INSERT
+          type: string
+        data:
+          $ref: '#/components/schemas/NotificationSocketMessage_data'
+      required:
+      - data
+      - operation
+      - table
+    NotificationSocketMessage_data:
+      description: notification data
+      properties:
+        id:
+          description: the id of the row changed
+          example: 6
+          type: integer
+        notificationTypeId:
+          description: describes the type of notification (0 = none, 1 = email, 2
+            = sms, 3 = slack)
+          example: 1
+          type: integer
+        createdTimestamp:
+          description: the creation timestamp of the row
+          example: 01/01/2021
+          type: string
+        notificationText:
+          description: notification text data
+          example: some data
+          type: string
+        notificationType:
+          description: textual descriptor for notificationTypeId
+          example: email
+          type: string
+      required:
+      - createdTimestamp
+      - id
+      - notificationText
+      - notificationType
+      - notificationTypeId
+      type: object
