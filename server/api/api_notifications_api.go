@@ -16,18 +16,18 @@ import (
 	"strings"
 )
 
-// A NotificationsAPIApiController binds http requests to an api service and writes the service results to the http response
-type NotificationsAPIApiController struct {
-	service NotificationsAPIApiServicer
+// A NotificationsApiController binds http requests to an api service and writes the service results to the http response
+type NotificationsApiController struct {
+	service NotificationsApiServicer
 }
 
-// NewNotificationsAPIApiController creates a default api controller
-func NewNotificationsAPIApiController(s NotificationsAPIApiServicer) Router {
-	return &NotificationsAPIApiController{service: s}
+// NewNotificationsApiController creates a default api controller
+func NewNotificationsApiController(s NotificationsApiServicer) Router {
+	return &NotificationsApiController{service: s}
 }
 
-// Routes returns all of the api route for the NotificationsAPIApiController
-func (c *NotificationsAPIApiController) Routes() Routes {
+// Routes returns all of the api route for the NotificationsApiController
+func (c *NotificationsApiController) Routes() Routes {
 	return Routes{
 		{
 			"AddNotification",
@@ -45,7 +45,7 @@ func (c *NotificationsAPIApiController) Routes() Routes {
 }
 
 // AddNotification - adds a new notification
-func (c *NotificationsAPIApiController) AddNotification(w http.ResponseWriter, r *http.Request) {
+func (c *NotificationsApiController) AddNotification(w http.ResponseWriter, r *http.Request) {
 	notificationDetails := &NotificationDetails{}
 	if err := json.NewDecoder(r.Body).Decode(&notificationDetails); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -63,7 +63,7 @@ func (c *NotificationsAPIApiController) AddNotification(w http.ResponseWriter, r
 }
 
 // Ping - tests this api
-func (c *NotificationsAPIApiController) Ping(w http.ResponseWriter, r *http.Request) {
+func (c *NotificationsApiController) Ping(w http.ResponseWriter, r *http.Request) {
 	result, err := c.service.Ping(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
