@@ -4,12 +4,22 @@
 <title>Postgres DB Notifications</title>
 <script type="text/javascript">
 window.onload = function () {
-    var conn;
-    var msg = document.getElementById("msg");
-    var log = document.getElementById("log");
+    let conn;
+    const log = document.getElementById("log");
 
-    function appendLog(item) {
-        var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+    function newLogItem(html, selector) {
+        const item = document.createElement("div");
+        if (selector) {
+            item.className = selector;
+        }
+        if (html) {
+            item.innerHTML = html;
+        }
+        appendLogItem(item);
+    }
+
+    function appendLogItem(item) {
+        const doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
         log.appendChild(item);
         if (doScroll) {
             log.scrollTop = log.scrollHeight - log.clientHeight;
@@ -17,7 +27,7 @@ window.onload = function () {
     }
 
     document.getElementById("form").onsubmit = function () {
-        var payload = {};
+        const payload = {};
         payload.notificationType = parseInt($("#form select").val());
         payload.notificationText = $("#form input[type=text]").val();
         $.ajax({
@@ -35,23 +45,22 @@ window.onload = function () {
 
     if (window["WebSocket"]) {
         conn = new WebSocket("ws://" + document.location.host + "/ws");
+        conn.onopen = function (evt) {
+            newLogItem("<b>socket opened</b>");
+        };
         conn.onclose = function (evt) {
-            var item = document.createElement("div");
-            item.innerHTML = "<b>socket closed</b>";
-            appendLog(item);
+            newLogItem("<b>socket closed</b>");
         };
         conn.onmessage = function (evt) {
-            var messages = evt.data.split('\n');
-            for (var i = 0; i < messages.length; i++) {
-                var item = document.createElement("div");
-                item.innerText = messages[i];
-                appendLog(item);
+            newLogItem(null, 'mono');
+            const msgParts = evt.data.split('\n');
+            for (let i = 0; i < msgParts.length; i++) {
+                const html = msgParts[i].replaceAll(" ", "&nbsp;")
+                newLogItem(html, 'mono');
             }
         };
     } else {
-        var item = document.createElement("div");
-        item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-        appendLog(item);
+        newLogItem(null, "<b>Your browser does not support WebSockets</b>");
     }
 };
 </script>
@@ -81,6 +90,12 @@ body {
     overflow: auto;
 }
 
+#log .mono {
+    font-family: 'Courier New', monospace;
+    min-height: 15px;
+
+}
+
 #form {
     padding: 0 0.5em 0 0.5em;
     margin: 0;
@@ -91,6 +106,9 @@ body {
     overflow: hidden;
 }
 
+#form input[type=text] {
+    width: 300px;
+}
 </style>
 </head>
 <body>
