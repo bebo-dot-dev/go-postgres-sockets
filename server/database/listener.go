@@ -69,7 +69,7 @@ func (l *PostgresDbListener) waitForNotification(dbl *pq.Listener) {
         case n := <- dbl.Notify:
             log.Println("DB listener received data from channel [", n.Channel, "] :")
             var prettyJSON bytes.Buffer
-            err := json.Indent(&prettyJSON, []byte(n.Extra), "", "\t")
+            err := json.Indent(&prettyJSON, []byte(n.Extra), "", "    ")
             if err != nil {
                 log.Println("DB listener error processing JSON: ", err)
             }

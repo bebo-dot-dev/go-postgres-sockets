@@ -12,6 +12,10 @@ github.com/bebo-dot-dev/go-postgres-sockets/server v0.0.0-20210801091450-d390bf5
 github.com/bebo-dot-dev/go-postgres-sockets/server v0.0.0-20210801091450-d390bf5b782e/go.mod h1:TvRvBsD2NAjwklFzsDjw8b0LFa06gMUJbDx/U8fisqQ=
 github.com/bebo-dot-dev/go-postgres-sockets/server v0.0.0-20210801091928-baaf9aa50a16 h1:3rycyUBPl3DsXCt7ihx4Mzo6jPKTXeO0AJhBzt9GqvY=
 github.com/bebo-dot-dev/go-postgres-sockets/server v0.0.0-20210801091928-baaf9aa50a16/go.mod h1:TvRvBsD2NAjwklFzsDjw8b0LFa06gMUJbDx/U8fisqQ=
+github.com/bebo-dot-dev/go-postgres-sockets/server v0.0.0-20210801122502-27e1e06ab5f9 h1:BydCZRtzCHHo+02LUDH/Ghf/xs42BSMSl8YgWfRQAXc=
+github.com/bebo-dot-dev/go-postgres-sockets/server v0.0.0-20210801122502-27e1e06ab5f9/go.mod h1:TvRvBsD2NAjwklFzsDjw8b0LFa06gMUJbDx/U8fisqQ=
+github.com/bebo-dot-dev/go-postgres-sockets/server v0.0.0-20210801123152-84c1f69e485b h1:RWlnKeiFiYWh2mPbV4Ql1Vt4TGfXr0b8bpK8Iq8vtLY=
+github.com/bebo-dot-dev/go-postgres-sockets/server v0.0.0-20210801123152-84c1f69e485b/go.mod h1:TvRvBsD2NAjwklFzsDjw8b0LFa06gMUJbDx/U8fisqQ=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/felixge/httpsnoop v1.0.1 h1:lvB5Jl89CsZtGIWuTcDM1E/vkVs49/Ml7JJe07l8SPQ=
