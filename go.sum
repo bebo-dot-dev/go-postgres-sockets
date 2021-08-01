@@ -6,6 +6,12 @@ github.com/bebo-dot-dev/go-postgres-sockets/server v0.0.0-20210731214855-0ea14f8
 github.com/bebo-dot-dev/go-postgres-sockets/server v0.0.0-20210731214855-0ea14f8f9c02/go.mod h1:EDiz/1U4PJBnGV0L24ksnxeBKLo0CJZyH2mexZE1tMs=
 github.com/bebo-dot-dev/go-postgres-sockets/server v0.0.0-20210731215509-b681350459bc h1:3UwDG57T6XauVnFRaAKet+jMQ59y6t1iVi9YcGITzGo=
 github.com/bebo-dot-dev/go-postgres-sockets/server v0.0.0-20210731215509-b681350459bc/go.mod h1:EDiz/1U4PJBnGV0L24ksnxeBKLo0CJZyH2mexZE1tMs=
+github.com/bebo-dot-dev/go-postgres-sockets/server v0.0.0-20210801085520-11a525b5ee84 h1:anxb2aAXuGE++cezaozNHpSwZNnzk+6MG0U/ZZyBUEY=
+github.com/bebo-dot-dev/go-postgres-sockets/server v0.0.0-20210801085520-11a525b5ee84/go.mod h1:TvRvBsD2NAjwklFzsDjw8b0LFa06gMUJbDx/U8fisqQ=
+github.com/bebo-dot-dev/go-postgres-sockets/server v0.0.0-20210801091450-d390bf5b782e h1:SOuKnW3WANxPwlLRH/QRxH5DM3IraMNTD+xo428OoFE=
+github.com/bebo-dot-dev/go-postgres-sockets/server v0.0.0-20210801091450-d390bf5b782e/go.mod h1:TvRvBsD2NAjwklFzsDjw8b0LFa06gMUJbDx/U8fisqQ=
+github.com/bebo-dot-dev/go-postgres-sockets/server v0.0.0-20210801091928-baaf9aa50a16 h1:3rycyUBPl3DsXCt7ihx4Mzo6jPKTXeO0AJhBzt9GqvY=
+github.com/bebo-dot-dev/go-postgres-sockets/server v0.0.0-20210801091928-baaf9aa50a16/go.mod h1:TvRvBsD2NAjwklFzsDjw8b0LFa06gMUJbDx/U8fisqQ=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/felixge/httpsnoop v1.0.1 h1:lvB5Jl89CsZtGIWuTcDM1E/vkVs49/Ml7JJe07l8SPQ=
@@ -20,6 +26,8 @@ github.com/gorilla/handlers v1.5.1 h1:9lRY6j8DEeeBT10CvO9hGW0gmky0BprnvDI5vfhUHH
 github.com/gorilla/handlers v1.5.1/go.mod h1:t8XrUpc4KVXb7HGyJ4/cEnwQiaxrX/hz1Zv/4g96P1Q=
 github.com/gorilla/mux v1.7.3 h1:gnP5JzjVOuiZD07fKKToCAOjS0yOpj/qPETTXCCS6hw=
 github.com/gorilla/mux v1.7.3/go.mod h1:1lud6UwP+6orDFRuTfBEV8e9/aOM/c4fVVCaMa2zaAs=
+github.com/gorilla/websocket v1.4.2 h1:+/TMaTYc4QFitKJxsQ7Yye35DkWvkdLcvGKqM+x0Ufc=
+github.com/gorilla/websocket v1.4.2/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/leodido/go-urn v1.2.1 h1:BqpAaACuzVSgi/VLzGZIobT2z4v53pjosyNd9Yv6n/w=
 github.com/leodido/go-urn v1.2.1/go.mod h1:zt4jvISO2HfUBqxjfIshjdMTYS56ZS/qv49ictyFfxY=
 github.com/lib/pq v1.10.2 h1:AqzbZs4ZoCBp+GtejcpCpcxM3zlSMx29dXbUSeVtJb8=
