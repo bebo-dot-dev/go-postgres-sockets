@@ -5,6 +5,7 @@ import (
     "database/sql"
     "encoding/json"
     "fmt"
+    "github.com/bebo-dot-dev/go-postgres-sockets/server/socket"
     "github.com/lib/pq"
     "log"
     "os"
@@ -18,10 +19,14 @@ const (
     dbname = "notifications"
 )
 
-type PostgresDbListener struct { }
+type PostgresDbListener struct {
+    socketHub *socket.Hub
+}
 
-func NewPostgresDbListener() *PostgresDbListener {
-    return &PostgresDbListener{}
+func NewPostgresDbListener(hub *socket.Hub) *PostgresDbListener {
+    return &PostgresDbListener{
+        socketHub: hub,
+    }
 }
 
 func (l *PostgresDbListener) getDbListener() *pq.Listener {
@@ -69,6 +74,7 @@ func (l *PostgresDbListener) waitForNotification(dbl *pq.Listener) {
                 log.Println("DB listener error processing JSON: ", err)
             }
             log.Println(string(prettyJSON.Bytes()))
+            l.socketHub.Broadcast <- prettyJSON.Bytes()
         case <-time.After(90 * time.Second):
             log.Println("DB listener received no notification events for 90 seconds, checking connection")
             go func() {
