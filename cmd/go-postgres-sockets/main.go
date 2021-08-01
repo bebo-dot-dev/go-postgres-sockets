@@ -12,6 +12,7 @@ package main
 
 import (
 	"github.com/bebo-dot-dev/go-postgres-sockets/server/api"
+	"github.com/bebo-dot-dev/go-postgres-sockets/server/database"
 	"github.com/gorilla/handlers"
 	"log"
 	"net/http"
@@ -20,10 +21,14 @@ import (
 func main() {
 	log.Printf("Server started")
 
-	service :=  api.NewNotificationsApiService()
+	listener := database.NewPostgresDbListener()
+	listener.Listen()
+
+	service := api.NewNotificationsApiService()
 	controller := api.NewNotificationsApiController(service)
 
 	router := api.NewRouter(controller)
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./cmd/go-postgres-sockets/static/")))
 
 	corsOrigins := handlers.AllowedOrigins([]string{"https://editor.swagger.io"})
 	corsHeaders := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
