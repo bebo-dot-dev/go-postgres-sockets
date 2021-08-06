@@ -1,142 +1,176 @@
 openapi: 3.0.0
 info:
+  title: Notifications API
+  description: A notifications proof of concept API
   contact:
     email: joe@bebo.dev
-  description: A notifications proof of concept API
   license:
     name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  title: Notifications API
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
   version: 0.1.0
 servers:
-- description: localhost test endpoint
-  url: http://localhost:8080
+  - url: 'http://localhost:8080'
+    description: localhost test endpoint
 tags:
-- description: Notifications operations
-  name: Notifications API
+  - name: Notifications API
+    description: Notifications operations
 paths:
   /ping:
     get:
+      tags:
+        - Notifications API
+      summary: tests this api
       description: returns the hostname of the server running this service
       operationId: ping
       responses:
-        "201":
+        '201':
+          description: server responded
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PingResponse'
-          description: server responded
-      summary: tests this api
-      tags:
-      - Notifications API
   /addNotification:
     put:
+      tags:
+        - Notifications API
+      summary: adds a new notification
       description: Adds a new notification to the system
       operationId: addNotification
       requestBody:
+        description: the notification to add
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/NotificationDetails'
-        description: the notification to add
       responses:
-        "201":
+        '201':
+          description: 'StatusCreated, notification created'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Id'
-          description: StatusCreated, notification created
-        "400":
+        '400':
           description: StatusBadRequest
-        "500":
+        '500':
           description: ServerError
-      summary: adds a new notification
+  /authenticate:
+    post:
       tags:
-      - Notifications API
+        - Notifications API
+      summary: authenticates a user request
+      description: >-
+        Authenticates a user request against the system
+        GO_POSTGRES_SOCKETS_AUTH_KEY and returns a new apiKey when successful
+      operationId: authenticate
+      requestBody:
+        description: the authKey to validate
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticationDetails'
+      responses:
+        '202':
+          description: 'StatusAccepted, request authenticated'
+          content:
+            application/json:
+              examples:
+                apiKey:
+                  value: super_secret
+        '400':
+          description: StatusBadRequest
+        '401':
+          description: StatusUnauthorized
 components:
   schemas:
     PingResponse:
-      example:
-        hostname: localhost
+      required:
+        - hostname
+      type: object
       properties:
         hostname:
-          example: localhost
           type: string
-      required:
-      - hostname
-      type: object
+          example: localhost
     NotificationDetails:
-      example:
-        notificationText: some notification data
-        notificationType: 1
+      required:
+        - notificationType
+        - notificationText
+        - apiKey
+      type: object
       properties:
         notificationType:
-          description: describes the type of notification (0 = none, 1 = email, 2
-            = sms, 3 = slack)
-          example: 1
+          description: >-
+            describes the type of notification (0 = none, 1 = email, 2 = sms, 3
+            = slack)
           type: integer
+          example: 1
         notificationText:
           description: arbitrary notification data
-          example: some notification data
           type: string
+          example: some notification data
+        apiKey:
+          description: the api key required for the call to succeed
+          type: string
+          example: super_secret
+    AuthenticationDetails:
       required:
-      - notificationText
-      - notificationType
+        - authKey
       type: object
+      properties:
+        authKey:
+          description: the auth key to use for an authentication attempt
+          type: string
+          example: super_secret
     Id:
-      example:
-        id: 123
+      required:
+        - id
       properties:
         id:
           description: the id of a new entity
-          example: 123
           type: integer
-      required:
-      - id
+          example: 123
     NotificationSocketMessage:
+      required:
+        - table
+        - operation
+        - data
       properties:
         table:
           description: describes the database table changed
-          example: notifications
           type: string
+          example: notifications
         operation:
           description: describes the database operation performed
+          type: string
           example: INSERT
-          type: string
         data:
-          $ref: '#/components/schemas/NotificationSocketMessage_data'
-      required:
-      - data
-      - operation
-      - table
-    NotificationSocketMessage_data:
-      description: notification data
-      properties:
-        id:
-          description: the id of the row changed
-          example: 6
-          type: integer
-        notificationTypeId:
-          description: describes the type of notification (0 = none, 1 = email, 2
-            = sms, 3 = slack)
-          example: 1
-          type: integer
-        createdTimestamp:
-          description: the creation timestamp of the row
-          example: 01/01/2021
-          type: string
-        notificationText:
-          description: notification text data
-          example: some data
-          type: string
-        notificationType:
-          description: textual descriptor for notificationTypeId
-          example: email
-          type: string
-      required:
-      - createdTimestamp
-      - id
-      - notificationText
-      - notificationType
-      - notificationTypeId
-      type: object
+          required:
+            - id
+            - notificationTypeId
+            - createdTimestamp
+            - notificationText
+            - notificationType
+          description: notification data
+          type: object
+          properties:
+            id:
+              description: the id of the row changed
+              type: integer
+              example: 6
+            notificationTypeId:
+              description: >-
+                describes the type of notification (0 = none, 1 = email, 2 =
+                sms, 3 = slack)
+              type: integer
+              example: 1
+            createdTimestamp:
+              description: the creation timestamp of the row
+              type: string
+              example: 01/01/2021
+            notificationText:
+              description: notification text data
+              type: string
+              example: some data
+            notificationType:
+              description: textual descriptor for notificationTypeId
+              type: string
+              example: email

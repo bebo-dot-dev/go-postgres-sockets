@@ -4,6 +4,7 @@
 <title>Postgres DB Notifications</title>
 <script type="text/javascript">
 window.onload = function () {
+    let apiKey;
     let conn;
     const log = document.getElementById("log");
 
@@ -26,10 +27,54 @@ window.onload = function () {
         }
     }
 
-    document.getElementById("form").onsubmit = function () {
-        const payload = {};
-        payload.notificationType = parseInt($("#form select").val());
-        payload.notificationText = $("#form input[type=text]").val();
+    $(document).on('click', '#authForm button', function(e) {
+        const payload = {
+            authKey : $("#authForm input[type=password]").val()
+        };
+        $.ajax({
+            url : '/authenticate',
+            dataType : 'json',
+            contentType: "application/json",
+            timeout : 2000,
+            data: JSON.stringify(payload),
+            method : 'POST'
+        }).done(function(data, textStatus, jqXHR) {
+            apiKey = data;
+            $('#authForm').hide();
+            $('#notificationForm').show();
+            $("#notificationForm input[type=text]").focus();
+
+            function socketConnect() {
+                conn = new WebSocket("ws://" + document.location.host + "/ws");
+                conn.onopen = function (evt) {
+                    newLogItem("<b>socket opened</b>");
+                };
+                conn.onclose = function (evt) {
+                    newLogItem("<b>socket closed</b>");
+                    setTimeout(function() {
+                        socketConnect();
+                    }, 5000);
+                };
+                conn.onmessage = function (evt) {
+                    newLogItem(null, 'mono');
+                    const msgParts = evt.data.split('\n');
+                    for (let i = 0; i < msgParts.length; i++) {
+                        const html = msgParts[i].replaceAll(" ", "&nbsp;")
+                        newLogItem(html, 'mono');
+                    }
+                };
+            }
+            socketConnect();
+        });
+        e.preventDefault();
+    });
+
+    $(document).on('click', '#notificationForm button', function(e) {
+        const payload = {
+            notificationType : parseInt($("#notificationForm select").val()),
+            notificationText : $("#notificationForm input[type=text]").val(),
+            apiKey : apiKey
+        };
         $.ajax({
             url : '/addNotification',
             dataType : 'json',
@@ -39,29 +84,21 @@ window.onload = function () {
             method : 'PUT'
         }).fail(function(jqXHR, textStatus, errorThrown) {
             console.log('addNotification ajax call failure', jqXHR, textStatus, errorThrown);
+        }).done(function(){
+            $("#notificationForm input[type=text]").val("");
+            $("#notificationForm input[type=text]").focus();
         });
-        return false;
-    };
+        e.preventDefault();
+    });
 
-    if (window["WebSocket"]) {
-        conn = new WebSocket("ws://" + document.location.host + "/ws");
-        conn.onopen = function (evt) {
-            newLogItem("<b>socket opened</b>");
-        };
-        conn.onclose = function (evt) {
-            newLogItem("<b>socket closed</b>");
-        };
-        conn.onmessage = function (evt) {
-            newLogItem(null, 'mono');
-            const msgParts = evt.data.split('\n');
-            for (let i = 0; i < msgParts.length; i++) {
-                const html = msgParts[i].replaceAll(" ", "&nbsp;")
-                newLogItem(html, 'mono');
-            }
-        };
-    } else {
-        newLogItem(null, "<b>Your browser does not support WebSockets</b>");
-    }
+    $(document).ready(function() {
+        if (!window["WebSocket"]) {
+            newLogItem(null, "<b>Your browser does not support WebSockets</b>");
+        } else {
+            $('#authForm').show();
+            $("#authForm input[type=password]").focus();
+        }
+    });
 };
 </script>
 <style>
@@ -96,7 +133,8 @@ body {
 
 }
 
-#form {
+#authForm, #notificationForm {
+    display: none;
     padding: 0 0.5em 0 0.5em;
     margin: 0;
     position: absolute;
@@ -106,14 +144,19 @@ body {
     overflow: hidden;
 }
 
-#form input[type=text] {
+#authForm input[type=text],
+#notificationForm input[type=text] {
     width: 300px;
 }
 </style>
 </head>
 <body>
 <div id="log"></div>
-<form id="form">    
+<form id="authForm">
+    <input type="password" id="authKey" size="64" autofocus  />
+    <button>Authenticate</button>
+</form>
+<form id="notificationForm">
     <select>
         <option value="0">None</option>
         <option value="1" selected>Email</option>
@@ -121,7 +164,7 @@ body {
         <option value="3">Slack</option>
     </select>
     <input type="text" id="msg" size="64" autofocus />
-    <input type="submit" value="New DB Notification" />
+    <button>New DB Notification</button>
 </form>
 </body>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>

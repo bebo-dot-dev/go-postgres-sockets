@@ -15,7 +15,6 @@ import (
 const (
     dbhost = "localhost"
     dbport = 5432
-    dbuser = "postgres"
     dbname = "notifications"
 )
 
@@ -31,7 +30,11 @@ func NewPostgresDbListener(hub *socket.Hub) *PostgresDbListener {
 
 func (l *PostgresDbListener) getDbListener() *pq.Listener {
     connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-        dbhost, dbport, dbuser, os.Getenv("POSTGRES_PASSWORD"), dbname)
+        dbhost,
+        dbport,
+        os.Getenv("POSTGRES_USER"),
+        os.Getenv("POSTGRES_PASSWORD"),
+        dbname)
 
     db, err := sql.Open("postgres", connStr)
     if err != nil {

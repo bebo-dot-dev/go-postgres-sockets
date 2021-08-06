@@ -19,6 +19,9 @@ type NotificationDetails struct {
 
 	// arbitrary notification data
 	NotificationText string `json:"notificationText" validate:"required"`
+
+	// the api key required for the call to succeed
+	ApiKey string `json:"apiKey" validate:"required"`
 }
 
 func (n *NotificationDetails) Validate() error {
