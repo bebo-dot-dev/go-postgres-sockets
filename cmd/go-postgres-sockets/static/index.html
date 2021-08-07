@@ -2,105 +2,6 @@
 <html lang="en">
 <head>
 <title>Postgres DB Notifications</title>
-<script type="text/javascript">
-window.onload = function () {
-    let apiKey;
-    let conn;
-    const log = document.getElementById("log");
-
-    function newLogItem(html, selector) {
-        const item = document.createElement("div");
-        if (selector) {
-            item.className = selector;
-        }
-        if (html) {
-            item.innerHTML = html;
-        }
-        appendLogItem(item);
-    }
-
-    function appendLogItem(item) {
-        const doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
-        log.appendChild(item);
-        if (doScroll) {
-            log.scrollTop = log.scrollHeight - log.clientHeight;
-        }
-    }
-
-    $(document).on('click', '#authForm button', function(e) {
-        const payload = {
-            authKey : $("#authForm input[type=password]").val()
-        };
-        $.ajax({
-            url : '/authenticate',
-            dataType : 'json',
-            contentType: "application/json",
-            timeout : 2000,
-            data: JSON.stringify(payload),
-            method : 'POST'
-        }).done(function(data, textStatus, jqXHR) {
-            apiKey = data;
-            $('#authForm').hide();
-            $('#notificationForm').show();
-            $("#notificationForm input[type=text]").focus();
-
-            function socketConnect() {
-                conn = new WebSocket("ws://" + document.location.host + "/ws");
-                conn.onopen = function (evt) {
-                    newLogItem("<b>socket opened</b>");
-                };
-                conn.onclose = function (evt) {
-                    newLogItem("<b>socket closed</b>");
-                    setTimeout(function() {
-                        socketConnect();
-                    }, 5000);
-                };
-                conn.onmessage = function (evt) {
-                    newLogItem(null, 'mono');
-                    const msgParts = evt.data.split('\n');
-                    for (let i = 0; i < msgParts.length; i++) {
-                        const html = msgParts[i].replaceAll(" ", "&nbsp;")
-                        newLogItem(html, 'mono');
-                    }
-                };
-            }
-            socketConnect();
-        });
-        e.preventDefault();
-    });
-
-    $(document).on('click', '#notificationForm button', function(e) {
-        const payload = {
-            notificationType : parseInt($("#notificationForm select").val()),
-            notificationText : $("#notificationForm input[type=text]").val(),
-            apiKey : apiKey
-        };
-        $.ajax({
-            url : '/addNotification',
-            dataType : 'json',
-            contentType: "application/json",
-            timeout : 2000,
-            data: JSON.stringify(payload),
-            method : 'PUT'
-        }).fail(function(jqXHR, textStatus, errorThrown) {
-            console.log('addNotification ajax call failure', jqXHR, textStatus, errorThrown);
-        }).done(function(){
-            $("#notificationForm input[type=text]").val("");
-            $("#notificationForm input[type=text]").focus();
-        });
-        e.preventDefault();
-    });
-
-    $(document).ready(function() {
-        if (!window["WebSocket"]) {
-            newLogItem(null, "<b>Your browser does not support WebSockets</b>");
-        } else {
-            $('#authForm').show();
-            $("#authForm input[type=password]").focus();
-        }
-    });
-};
-</script>
 <style>
 html {
     overflow: hidden;
@@ -152,20 +53,168 @@ body {
 </head>
 <body>
 <div id="log"></div>
-<form id="authForm">
-    <input type="password" id="authKey" size="64" autofocus  />
-    <button>Authenticate</button>
-</form>
-<form id="notificationForm">
-    <select>
+<div id="authForm">
+    <input id="authKey" type="password" size="64" autofocus  />
+    <button id="authBtn">Authenticate</button>
+</div>
+<div id="notificationForm">
+    <select id="nType">
         <option value="0">None</option>
         <option value="1" selected>Email</option>
         <option value="2">SMS</option>
         <option value="3">Slack</option>
     </select>
-    <input type="text" id="msg" size="64" autofocus />
-    <button>New DB Notification</button>
-</form>
+    <input id="nText" type="text" size="64" autofocus />
+    <button id="notifyBtn">New DB Notification</button>
+</div>
 </body>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script>
+    'use strict';
+
+    //DOM ready
+    (function() {
+        let ws = null;
+        let inSocketRetry = false;
+        let socketRetryLogItem = null;
+        let apiKey;
+        const log = document.getElementById("log");
+
+        function newLogItem(html, selector) {
+            const item = document.createElement("div");
+            if (selector) {
+                item.className = selector;
+            }
+            if (html) {
+                item.innerHTML = html;
+            }
+            appendLogItem(item);
+            return item;
+        }
+
+        function appendLogItem(item) {
+            log.appendChild(item);
+            log.scrollTop = log.scrollHeight - log.clientHeight;
+        }
+
+        if (!window["WebSocket"]) {
+            newLogItem("<b>Your browser does not support WebSockets</b>");
+        } else {
+            document.getElementById("authForm").style.display = "block";
+        }
+
+        document.getElementById("authBtn").addEventListener("click", function (e) {
+            const payload = {
+                authKey : document.getElementById("authKey").value
+            };
+
+            (async function() {
+                const response = await fetch('/authenticate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                })
+
+                if (response.ok) {
+                    const t = await response.json();
+                    return Promise.resolve(t);
+                } else {
+                    return Promise.reject("<b>/authenticate call failure</b>");
+                }
+            })()
+            .then(response => {
+                newLogItem("<b>authenticated</b>");
+                console.log(response);
+                apiKey = response;
+                document.getElementById("authForm").style.display = "none";
+                document.getElementById("notificationForm").style.display = "block";
+                document.getElementById("nText").focus();
+
+                function socketConnect() {
+                    ws = new WebSocket("ws://" + document.location.host + "/ws");
+
+                    ws.onopen = function () {
+                        inSocketRetry = false;
+                        newLogItem("<b>socket opened - try opening multiple browser tabs or multiple browser windows</b>");
+                    };
+
+                    ws.onclose = function () {
+                        if (!inSocketRetry) {
+                            socketRetryLogItem = newLogItem("<b>socket closed</b>");
+                        } else {
+                            socketRetryLogItem.innerHTML += '<b>.</b>';
+                        }
+                        inSocketRetry = true;
+                        setTimeout(function () {
+                            socketConnect();
+                        }, 1000);
+                    };
+
+                    ws.onmessage = function (e) {
+                        newLogItem(null, 'mono');
+                        const msgParts = e.data.split('\n');
+                        for (let i = 0; i < msgParts.length; i++) {
+                            const html = msgParts[i].replaceAll(" ", "&nbsp;")
+                            newLogItem(html, 'mono');
+                        }
+                    };
+                }
+                if (ws === null) {
+                    socketConnect();
+                }
+            })
+            .catch(err => {
+                newLogItem(err);
+                console.log(err);
+            });
+        });
+
+        document.getElementById("notifyBtn").addEventListener("click", function (e) {
+            const payload = {
+                notificationType : parseInt(document.getElementById("nType").value),
+                notificationText : document.getElementById("nText").value,
+                apiKey : apiKey
+            };
+
+            (async function() {
+                const response = await fetch('/addNotification', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                })
+
+                if (response.ok) {
+                    const t = await response.text();
+                    return Promise.resolve(t);
+                } else {
+                    return Promise.reject(
+                        {
+                            responseCode: response.status,
+                            msg: response.status == 401
+                                ? "<b>/addNotification call failure - NotAuthorised</b>"
+                                : "<b>/addNotification call failure</b>"
+                        });
+                }
+            })()
+            .then(data => {
+                console.log('Success:', data);
+                document.getElementById("nText").value = "";
+                document.getElementById("nText").focus();
+            })
+            .catch(err => {
+                newLogItem(err.msg || "<b>/addNotification call failure</b>");
+                console.log(err);
+                if (err.responseCode === 401) {
+                    //unauthorised
+                    document.getElementById("authForm").style.display = "block";
+                    document.getElementById("notificationForm").style.display = "none";
+                    document.getElementById("authKey").focus();
+                }
+            });
+        });
+    })();
+</script>
 </html>
