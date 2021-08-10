@@ -12,7 +12,6 @@ import (
 )
 
 const (
-	dbhost = "localhost"
 	dbport = 5432
 	dbname = "notifications"
 )
@@ -31,7 +30,7 @@ func NewNotificationsApiService() NotificationsApiServicer {
 
 func (s *NotificationsApiService) getDbConnection() *sql.DB {
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		dbhost,
+		os.Getenv("DB_HOST"),
 		dbport,
 		os.Getenv("POSTGRES_USER"),
 		os.Getenv("POSTGRES_PASSWORD"),
