@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "go-postgres-sockets-service"
+  namespace: "go-postgres-sockets-gke-ns"
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "sockets-ingress-ip"
+    networking.gke.io/managed-certificates: "sockets-certificate"
+spec:
+  rules:
+  - http:
+      paths:
+      - pathType: ImplementationSpecific
+        path: /*
+        backend:
+          service:
+            name: "go-postgres-sockets-service"
+            port:
+              number: 8080

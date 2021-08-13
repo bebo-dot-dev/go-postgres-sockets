@@ -1,0 +1,8 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: sockets-certificate
+  namespace: "go-postgres-sockets-gke-ns"
+spec:
+  domains:
+  - sockets.bebo.dev

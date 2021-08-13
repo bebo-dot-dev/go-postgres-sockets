@@ -1,0 +1,17 @@
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  name: "go-postgres-sockets-service"
+  namespace: "go-postgres-sockets-gke-ns"
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+spec:
+  ports:
+  - name: 8080-8080
+    port: 8080
+    protocol: "TCP"
+    targetPort: 8080
+  selector:
+    app: "go-postgres-sockets"
+  type: ClusterIP
