@@ -1,6 +1,6 @@
 # go-postgres-sockets
 
-https://sockets.bebo.dev (Google Cloud Platform k8s hosted)
+https://sockets.bebo.dev (Google Cloud Platform [k8s hosted](https://github.com/bebo-dot-dev/go-postgres-sockets/tree/main/cmd/go-postgres-sockets/k8s))
 
 A proof of concept Go application that demonstrates the use of postgres NOTIFY (plpgsql pg_notify function) and LISTEN (Go postgres package *pq.Listener) in conjunction with https://github.com/gorilla/websocket. 
 
