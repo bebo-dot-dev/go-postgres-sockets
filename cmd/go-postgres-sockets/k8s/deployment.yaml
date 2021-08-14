@@ -17,7 +17,7 @@ spec:
       serviceAccountName: go-postgres-sockets-gke-ksa
       containers:
       - name: go-postgres-sockets
-        image: europe-west2-docker.pkg.dev/gke-test-322018/go-postgres-sockets-repo/go-postgres-sockets:latest
+        image: europe-west2-docker.pkg.dev/bebo-dev-sockets/go-postgres-sockets-repo/go-postgres-sockets:latest
         ports:
         - containerPort: 8080
         resources:
@@ -44,11 +44,11 @@ spec:
             secretKeyRef:
               name: gke-secrets
               key: go-postgres-sockets-auth-key
-      - name: cloud-sql-proxy        
+      - name: cloud-sql-proxy
         image: gcr.io/cloudsql-docker/gce-proxy:latest
         command:
           - "/cloud_sql_proxy"
-          - "-instances=gke-test-322018:europe-west2:postgres=tcp:5432"
+          - "-instances=bebo-dev-sockets:europe-west2:postgres=tcp:5432"
         securityContext:
           runAsNonRoot: true
         resources:
