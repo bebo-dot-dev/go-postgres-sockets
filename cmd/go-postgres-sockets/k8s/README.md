@@ -1,6 +1,6 @@
 # go-postgres-sockets
 
-## This is an outline set of steps that result in this application being built and hosted in a Google Cloud Platform (GCP) k8s Google Kuberneter Engine (GKE) cluster. This document assumes a local install of the GCP SDK and/or use of the Google Cloud Shell for executing `gcloud` and `kubectl` commands.
+## This is an outline set of steps that result in this application being built and hosted in a Google Cloud Platform (GCP) k8s Google Kubernetes Engine (GKE) cluster. These steps assume a local install of the GCP SDK and/or use of the Google Cloud Shell for executing `gcloud` and `kubectl` commands.
 ---
 
 ### 1. create an artifact repository in the desired target location to act as the target for the containerised application
