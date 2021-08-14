@@ -13,6 +13,7 @@ package api
 import (
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -22,6 +23,7 @@ func Logger(inner http.Handler, name string) http.Handler {
 
 		inner.ServeHTTP(w, r)
 
+		log.SetOutput(os.Stdout)
 		log.Printf(
 			"%s %s %s %s",
 			r.Method,

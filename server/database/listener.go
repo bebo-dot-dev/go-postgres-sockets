@@ -52,7 +52,7 @@ func (l *PostgresDbListener) getDbListener() *pq.Listener {
 
     stateChange := func(ev pq.ListenerEventType, err error) {
         if err != nil {
-            log.Printf("postgres database listener state change: %v", err.Error())
+            l.doLog(true, "Postgres database listener state change: ", err)
         }
     }
 
@@ -69,28 +69,37 @@ func (l *PostgresDbListener) waitForNotification(dbl *pq.Listener) {
     for {
         select {
         case n := <- dbl.Notify:
-            log.Println("DB listener received data from channel [", n.Channel, "] :")
+            l.doLog(false, "DB listener received data from channel [", n.Channel, "]")
             var prettyJSON bytes.Buffer
             err := json.Indent(&prettyJSON, []byte(n.Extra), "", "    ")
             if err != nil {
-                log.Println("DB listener error processing JSON: ", err)
+                l.doLog(true, "DB listener error processing JSON: ", err)
             }
             log.Println(string(prettyJSON.Bytes()))
             l.socketHub.Broadcast <- prettyJSON.Bytes()
         case <-time.After(90 * time.Second):
-            log.Println("DB listener received no notification events for 90 seconds, checking connection")
+            l.doLog(false, "DB listener received no notification events for 90 seconds, pinging DB connection")
             go func() {
                 err := dbl.Ping()
                 if err != nil {
-                    log.Println("listener ping error: ", err)
+                    l.doLog(true, err)
                 }
             }()
         }
     }
 }
 
+func (l *PostgresDbListener) doLog(isError bool, v ...interface{}) {
+    if isError {
+        log.SetOutput(os.Stderr)
+    } else {
+        log.SetOutput(os.Stdout)
+    }
+    log.Println(v)
+}
+
 func (l *PostgresDbListener) Listen() {
-    log.Println("Starting database notifications listener")
+    l.doLog(false, "Starting database notifications listener")
     dbl := l.getDbListener()
     go func() {
         for {
