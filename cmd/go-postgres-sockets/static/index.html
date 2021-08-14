@@ -26,12 +26,15 @@ body {
     right: 0.5em;
     bottom: 3em;
     overflow: auto;
+    /*mobile font boost prevention*/
+    -webkit-text-size-adjust: none;
+    -moz-text-size-adjust: none;
+    -ms-text-size-adjust: none;
 }
 
 #log .mono {
     font-family: 'Courier New', monospace;
     min-height: 15px;
-
 }
 
 #authForm, #notificationForm {
