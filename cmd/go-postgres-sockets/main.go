@@ -10,12 +10,14 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"os"
 )
 
 //go:embed static
 var embeddedFiles embed.FS
 
 func main() {
+	log.SetOutput(os.Stdout)
 	log.Printf("Server started")
 
 	service := api.NewNotificationsApiService()
