@@ -27,15 +27,29 @@ gcloud services enable servicenetworking.googleapis.com &&
 gcloud services enable sourcerepo.googleapis.com &&
 gcloud services enable sqladmin.googleapis.com
 ```
-### 4. create a new named Google service account and make the new account an editor
+### 4. create a new named Google service account and make the new account an editor and a sql admin
 ```
 gcloud iam service-accounts create terraform-sockets-sa
 
 gcloud projects add-iam-policy-binding bebo-dev-sockets \
   --member serviceAccount:terraform-sockets-sa@bebo-dev-sockets-terraform.iam.gserviceaccount.com \
   --role roles/editor
+
+gcloud projects add-iam-policy-binding bebo-dev-sockets \
+  --member serviceAccount:terraform-sockets-sa@bebo-dev-sockets-terraform.iam.gserviceaccount.com \
+  --role roles/cloudsql.admin
 ```
-### 5. create new key credentials for the service account and download the creds as a json file
+### 5. create new key credentials for the service account, download the credentials as a json file and move this file as `gcp-sa-credentials.json` into the terrform root directory where this README file resides. This credentials file is used in terraform configuration to provision GCP infrastructure
 ```
-gcloud iam service-accounts keys create bebo-dev-sockets-terraform-credentials.json --iam-account=terraform-sockets-sa@bebo-dev-sockets-terraform.iam.gserviceaccount.com
+gcloud iam service-accounts keys create gcp-sa-credentials.json --iam-account=terraform-sockets-sa@bebo-dev-sockets-terraform.iam.gserviceaccount.com
+```
+### 6. required environment variables to be pre-configured and present that are used by terraform configuration
+
+* TF_VAR_GCP_POSTGRES_PASSWORD. A super secret password for the postgres database postgres user account
+
+### 7. initialise terraform and apply the configuration to GCP
+```
+terraform init
+
+terraform apply
 ```

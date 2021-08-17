@@ -1,1 +1,4 @@
-/bebo-dev-sockets-terraform*.json
+**/.terraform*
+**/terraform.tfstate*
+**/*credentials*.json
+
