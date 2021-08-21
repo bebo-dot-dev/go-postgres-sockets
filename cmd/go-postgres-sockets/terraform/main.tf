@@ -16,6 +16,12 @@ provider "google" {
 
 module "postgres_database" {
   source = "./modules/postgres-database"
-  region = var.region
+  region = "${var.region}"
   GCP_POSTGRES_PASSWORD = var.GCP_POSTGRES_PASSWORD
+}
+
+module "docker_build" {
+  source = "./modules/docker-build"
+  project = "${var.project}"
+  region = "${var.region}"
 }
